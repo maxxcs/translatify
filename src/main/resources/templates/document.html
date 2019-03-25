@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Translatify</title>
+    <link rel='shortcut icon' type='image/x-icon' href="../static/img/favicon.ico" th:href="@{/img/favicon.ico}"/>
+    <link rel="icon" href="../static/img/favicon.ico" th:href="@{/img/favicon.ico}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="../static/css/materialize.min.css" th:href="@{/css/materialize.min.css}" media="screen,projection"/>
+    <link rel="stylesheet" href="../static/css/custom.css" th:href="@{/css/custom.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+    <header>
+        <div th:if="${auth}">
+            <ul id="dropdown-nav" class="dropdown-content">
+                <li><a th:href="@{'/user/' + ${auth.getId()}}">Profile </a></li>
+                <li class="divider"></li>
+                <li><a href="/logout">Logout </a></li>
+            </ul>
+            <div class="navbar-fixed">
+                <nav>
+                    <div class="nav-wrapper blue-grey darken-4">
+                        <a href="/" class="brand-logo"><i class="material-icons">format_align_right</i> Translatify</a>
+                        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                        <ul id="nav-mobile" class="right hide-on-med-and-down">
+                            <li><a class="waves-effect waves-light btn" href="/new-document">New document <i class="material-icons right">add</i></a></li>
+                            <li><a class="dropdown-trigger" href="#!" data-target="dropdown-nav"><span th:text="${auth.getUsername()}"></span><i class="material-icons right">arrow_drop_down</i></a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            <ul class="sidenav" id="mobile-demo">
+                <li><a href="/new-document">New document</a></li>
+                <li><a th:href="@{'/user/' + ${auth.getId()}}">Profile</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </div>
+        <div th:unless="${auth}">
+            <div class="navbar-fixed">
+                <nav>
+                    <div class="nav-wrapper blue-grey darken-4">
+                        <a href="/" class="brand-logo"><i class="material-icons">format_align_right</i> Translatify</a>
+                        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                        <ul id="nav-mobile" class="right hide-on-med-and-down">
+                            <li><a href="/register"><i class="material-icons left">supervisor_account</i>Sign up</a></li>
+                            <li><a href="/login"><i class="material-icons left">person</i>Sign in</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            <ul class="sidenav" id="mobile-demo">
+                <li><a href="/register">Sign up</a></li>
+                <li><a href="/login">Sign in</a></li>
+            </ul>
+        </div>
+        <br>
+    </header>
+    <main>
+        <div class="container">
+            <div class="row card-panel">
+                <div class="col s12">
+                    <div class="col s6">
+                            <ul class="collection">
+                                    <li class="collection-item"><strong>Title: </strong><span th:text="${doc.getTitle()}"></span></li>
+                                    <li class="collection-item"><strong>OP: </strong><a th:href="@{'/user/' + ${doc.getUser().getId()}}"><span th:text="${doc.getUser().getUsername()}"></span></a></li>
+                                    <li class="collection-item"><strong>Language: </strong><span th:if="${branch.getBase()}"><span th:text="${branch.getBase().getLanguage()}"></span></span><span th:unless="${branch.getBase()}"><span th:text="${doc.getLanguage()}"></span></span></li>
+                                    <li class="collection-item"><strong>Translate: </strong><span th:text="${branch.getLanguage()}"></span></li>
+                            </ul>
+                    </div>
+                    <div class="col s6">
+                            <ul class="collection">
+                                    <li class="collection-item"><strong>Last edited by: </strong><a th:href="@{'/user/' + ${branch.getUser().getId()}}"><span th:text="${branch.getUser().getUsername()}"></span></a></li>
+                                    <li class="collection-item"><strong>Flag: </strong><span th:text="${branch.getFlag()}"></span></li>
+                                    <li class="collection-item"><strong>Base: </strong><span th:if="${branch.getBase()}"><a th:href="@{'/document/' + ${branch.getBase().getId()}}"><span th:text="${branch.getBase().getName()}"></span></a></span><span th:unless="${branch.getBase()}"></span></li>       
+                                    <li class="collection-item"><strong>Branch: </strong><a th:href="@{'/document/' + ${branch.getId()}}"><span th:text="${branch.getName()}"></span></a></li>
+                            </ul>
+                    </div>
+                    <ul class="tabs ">
+                        <li class="tab col s4"><a class="active" href="#current">Current</a></li>
+                        <li class="tab col s4"><a href="#raw">Raw</a></li>
+                        <li class="tab col s4"><a href="#changelog">Changelog</a></li>
+                    </ul>
+                    <br>
+                </div>
+                
+                <div id="current" class="col s12 ">
+                    <textarea class="materialize-textarea" th:text="${branch.getContent()}" disabled></textarea>
+                </div>
+                <div id="raw" class="col s12">
+                    <textarea class="materialize-textarea" th:text="${raw.getContent()}" disabled></textarea>
+                </div>
+                <div id="changelog" class="col s12">
+                    <table class="striped center-align">
+                        <thead>
+                            <tr>
+                                <th>Branch</th>
+                                <th>Base</th>
+                                <th>Language</th>
+                                <th>Flag</th>
+                                <th>Author</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="i : ${#numbers.sequence(branches.size() - 1, 0, -1)}" th:with="br=${branches[i]}">
+                                <td><a th:href="@{'/document/' + ${br.getId()}}"><span th:text="${br.getName()}"></span></a></td>
+                                <td><span th:if="${br.getBase()}"><a th:href="@{'/document/' + ${br.getBase().getId()}}"><span th:text="${br.getBase().getName()}"></span></a></span><span th:unless="${br.getBase()}"></span></td>
+                                <td><span th:if="${br.getBase()}"><span th:text="${br.base.getLanguage()}"></span></span><span th:unless="${br.getBase()}"><span th:text="${doc.getLanguage()}"></span></span><i class="material-icons" style="vertical-align:middle">chevron_right</i> <span th:text="${br.getLanguage()}"></span></td>
+                                <td><span th:text="${br.getFlag()}"></span></td>
+                                <td><a th:href="@{'/user/' + ${br.getUser().getId()}}"><span th:text="${br.getUser().getUsername()}"></span></a></td>
+                                <td><span th:text="${#dates.format(br.getDate(), 'dd/MM/yy - HH:mm')}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> 
+            </div>
+            <div class="row card-panel">
+                <ul class="collection" th:each="comment : ${comments}">
+                    <li class="collection-item avatar">
+                        <img class="circle responsive-img" th:src="@{/img/users/default-avatar.png}" width="120px">
+                        <strong><a th:href="@{'/user/' + ${comment.getUser().getId()}}"><span class="title" th:text="${comment.getUser().getUsername()}"></span></a></strong>
+                        <strong><span class="right" th:text="${#dates.format(comment.getDate(), 'dd/MM/yy - HH:mm')}"></span></strong>
+                        <p th:text="${comment.getContent()}"></p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div th:if="${auth}" id="modal-form" class="modal">
+            <form th:action="@{'/document/' + ${branch.getId()}}" method="POST">
+                <div class="modal-content">
+                    <h6 class="center-align">Add a comment</h6>
+                    <hr class="nice">
+                    <div class="row">
+                        <div class="col s3">
+                            <br>
+                            <img class="circle responsive-img" src="../static/img/users/default-avatar.png" th:src="@{/img/users/default-avatar.png}" width="200px">
+                        </div>
+                        <div class="input-field col s9">
+                            <h5 th:text="${auth.getUsername()}"></h5>
+                            <textarea id="raw" class="materialize-textarea" placeholder="Place content here" name="content" required></textarea>
+                        </div>
+                    </div>             
+                </div>
+                <div class="modal-footer">
+                    <button class="btn waves-effect waves-light" type="submit" name="action">Submit<i class="material-icons right">send</i></button>
+                    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+    <footer class="page-footer blue-grey darken-4">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+                    <h5 class="white-text">About us</h5>
+                    <p class="grey-text text-lighten-4">Translatify is a collaborative translation platform that aims to universalize reading access for all.</p>
+                </div>
+                <div class="col l4 offset-l2 s12">
+                    <h5 class="white-text">Follow us</h5>
+                    <a class="grey-text text-lighten-3" href="#!"><img src="../static/img/icons/twitter.png" th:src="@{/img/icons/twitter.png}" width="40px"></a>&nbsp;&nbsp;&nbsp;
+                    <a class="grey-text text-lighten-3" href="#!"><img src="../static/img/icons/googleplus.png" th:src="@{/img/icons/googleplus.png}" width="40px"></a>&nbsp;&nbsp;&nbsp;
+                    <a class="grey-text text-lighten-3" href="#!"><img src="../static/img/icons/facebook.png" th:src="@{/img/icons/facebook.png}" width="40px"></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+            © 2018 Translatify - Max Carlesso dos Santos
+            <a class="grey-text text-lighten-4 right" href="#!">About</a>
+            </div>
+        </div>
+    </footer>
+
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large blue" th:href="@{'/editor/' + ${branch.getId()}}">
+            <i class="large material-icons">mode_edit</i>
+        </a>
+        <ul>
+            <li><a class="btn-floating red" th:href="@{'/document/' + ${branch.getId()} + '/pdf'}"><i class="material-icons">picture_as_pdf</i></a></li>
+            <li><a class="btn-floating green modal-trigger" href="#modal-form"><i class="material-icons">insert_comment</i></a></li>
+        </ul>
+    </div>
+
+
+    <script type="text/javascript" src="../static/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" src="../static/js/materialize.min.js" th:src="@{/js/materialize.min.js}"></script>
+    <script src="../static/js/render.js" th:src="@{/js/render.js}"></script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Translatify</title>
+    <link rel='shortcut icon' type='image/x-icon' href="../static/img/favicon.ico" th:href="@{/img/favicon.ico}"/>
+    <link rel="icon" href="../static/img/favicon.ico" th:href="@{/img/favicon.ico}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="../static/css/materialize.min.css" th:href="@{/css/materialize.min.css}" media="screen,projection"/>
+    <link rel="stylesheet" href="../static/css/custom.css" th:href="@{/css/custom.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+    <header>
+        <div th:if="${auth}">
+            <ul id="dropdown-nav" class="dropdown-content">
+                <li><a th:href="@{'/user/' + ${auth.getId()}}">Profile </a></li>
+                <li class="divider"></li>
+                <li><a href="/logout">Logout </a></li>
+            </ul>
+            <div class="navbar-fixed">
+                <nav>
+                    <div class="nav-wrapper blue-grey darken-4">
+                        <a href="/" class="brand-logo"><i class="material-icons">format_align_right</i> Translatify</a>
+                        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                        <ul id="nav-mobile" class="right hide-on-med-and-down">
+                            <li><a class="waves-effect waves-light btn" href="/new-document">New document <i class="material-icons right">add</i></a></li>
+                            <li><a class="dropdown-trigger" href="#!" data-target="dropdown-nav"><span th:text="${auth.getUsername()}"></span><i class="material-icons right">arrow_drop_down</i></a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            <ul class="sidenav" id="mobile-demo">
+                <li><a href="/new-document">New document</a></li>
+                <li><a th:href="@{'/user/' + ${auth.getId()}}">Profile</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </div>
+        <div th:unless="${auth}">
+            <div class="navbar-fixed">
+                <nav>
+                    <div class="nav-wrapper blue-grey darken-4">
+                        <a href="/" class="brand-logo"><i class="material-icons">format_align_right</i> Translatify</a>
+                        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                        <ul id="nav-mobile" class="right hide-on-med-and-down">
+                            <li><a href="/register"><i class="material-icons left">supervisor_account</i>Sign up</a></li>
+                            <li><a href="/login"><i class="material-icons left">person</i>Sign in</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            <ul class="sidenav" id="mobile-demo">
+                <li><a href="/register">Sign up</a></li>
+                <li><a href="/login">Sign in</a></li>
+            </ul>
+        </div>
+        <br>
+    </header>
+    <main>
+        <div class="container">
+            <div class="row">
+                <div class="col s12 l10 xl9">
+                    <nav>
+                        <div class="nav-wrapper light-blue darken-2">
+                            <form action="/" method="GET">
+                            <div class="input-field">
+                                <input id="search" type="search" name="search" required placeholder="Search for documents..." th:value="${search}">
+                                <label class="label-icon" for="search"><i class="material-icons">search</i></label>
+                                <i class="material-icons">close</i>
+                            </div>
+                            </form>
+                        </div>
+                    </nav>
+                    <br>
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Branch</th>
+                                <th>Language</th>
+                                <th>Flag</th>
+                                <th>Author</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="i : ${#numbers.sequence(branches.size() - 1, 0, -1)}" th:with="br=${branches[i]}">
+                                <td><a th:href="@{'/document/' + ${br.getId()}}"><span th:text="${br.getDocument().getTitle()}"></span></a></td>
+                                <td><a th:href="@{'/document/' + ${br.getId()}}"><span th:text="${br.getName()}"></span></a></td>
+                                <td><span th:if="${br.getBase()}"><span th:text="${br.base.getLanguage()}"></span></span><span th:unless="${br.getBase()}"><span th:text="${br.getDocument().getLanguage()}"></span></span><i class="material-icons" style="vertical-align:middle">chevron_right</i> <span th:text="${br.getLanguage()}"></span></td>
+                                <td><span th:text="${br.getFlag()}"></span></td>
+                                <td><a th:href="@{'/user/' + ${br.getUser().getId()}}"><span th:text="${br.getUser().getUsername()}"></span></a></td>
+                                <td><span th:text="${#dates.format(br.getDate(), 'dd/MM/yy - HH:mm')}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <ul class="pagination center-align">
+                        <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+                        <li class="active light-blue darken-3"><a href="#!">1</a></li>
+                        <li class="waves-effect"><a href="#!">2</a></li>
+                        <li class="waves-effect"><a href="#!">3</a></li>
+                        <li class="waves-effect"><a href="#!">4</a></li>
+                        <li class="waves-effect"><a href="#!">5</a></li>
+                        <li class="waves-effect"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+                    </ul>
+                </div>
+
+                <div class="col s12 l2 xl3">
+                    <div class="card-panel teal darken-3">
+                        <span class="white-text">     
+                            <p class="center-align"><i class="material-icons" style="font-size: 60px">edit</i><br>Create documents to be translated by you and the community.</p>
+                        </span>
+                    </div>
+                    <div class="card-panel light-blue darken-3">
+                        <span class="white-text">
+                            <p class="center-align"><i class="material-icons" style="font-size: 60px">subject</i><br>Collaborate translating or revising other documents.</p>
+                        </span>
+                    </div>
+                    <div class="card-panel light-green darken-3">
+                        <span class="white-text">
+                            <p class="center-align"><i class="material-icons" style="font-size: 60px">group</i><br>Let everyone can read without language barriers.</p>
+                        </span>
+                    </div>                    
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="page-footer blue-grey darken-4">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+                    <h5 class="white-text">About us</h5>
+                    <p class="grey-text text-lighten-4">Translatify is a collaborative translation platform that aims to universalize reading access for all.</p>
+                </div>
+                <div class="col l4 offset-l2 s12">
+                    <h5 class="white-text">Follow us</h5>
+                    <a class="grey-text text-lighten-3" href="#!"><img src="../static/img/icons/twitter.png" th:src="@{/img/icons/twitter.png}" width="40px"></a>&nbsp;&nbsp;&nbsp;
+                    <a class="grey-text text-lighten-3" href="#!"><img src="../static/img/icons/googleplus.png" th:src="@{/img/icons/googleplus.png}" width="40px"></a>&nbsp;&nbsp;&nbsp;
+                    <a class="grey-text text-lighten-3" href="#!"><img src="../static/img/icons/facebook.png" th:src="@{/img/icons/facebook.png}" width="40px"></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+            © 2018 Translatify - Max Carlesso dos Santos
+            <a class="grey-text text-lighten-4 right" href="#!">About</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="text/javascript" src="../static/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" src="../static/js/materialize.min.js" th:src="@{/js/materialize.min.js}"></script>
+    <script src="../static/js/render.js" th:src="@{/js/render.js}"></script>
+</body>
+</html>
